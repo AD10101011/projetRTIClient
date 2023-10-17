@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Jars">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ClientMaraicher/Jars/flatlaf-3.2.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ClientMaraicher/Jars/mysql-connector-j-8.0.32.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

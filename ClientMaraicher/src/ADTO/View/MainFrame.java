@@ -1,17 +1,18 @@
 package ADTO.View;
 
-import ADTO.Controller.ClientController;
+import ADTO.Controller.Controller;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.net.Socket;
-import java.sql.Connection;
 import java.sql.SQLException;
 
-public class MainFrame extends  JFrame{
+public class MainFrame extends  JFrame
+{
+    JFrame frame;
     private JTextField UserTextField;
     private JTextField PasswordTextField;
     private JButton loginButton;
@@ -27,7 +28,6 @@ public class MainFrame extends  JFrame{
     private JSpinner QuantiteSpinner;
     private JButton previousArticleButton;
     private JButton nextArticleButton;
-    private JPanel PublicitePanel;
     private JPanel PanierPanel;
     private JTable table;
     private JButton viderLePanierButton;
@@ -48,6 +48,7 @@ public class MainFrame extends  JFrame{
     public JTextField getPasswordTextField() {
         return PasswordTextField;
     }
+    public JFrame getFrame() { return frame; }
 
     public JButton getLoginButton() {
         return loginButton;
@@ -55,39 +56,20 @@ public class MainFrame extends  JFrame{
 
     //#endregion
 
-
-
-    public MainFrame(Socket socket, Connection con)  {
-
+    public MainFrame()  {
 
         // Affichage de la fenêtre
-        JFrame frame = new JFrame("Le Maraicher d'abdel karim");
+        frame = new JFrame("Le Maraicher d'abdel karim");
         frame.setContentPane(MainPanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        // Fermeture de l'application
+        // A la Fermeture de l'application
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                System.out.println("Fermeture de l'application");
-
-                try {
-                    socket.close();
-                    System.out.printf("Socket fermée\n");
-                    con.close();
-                    System.out.println("Connexion à la base de données fermée");
-                } catch (IOException | SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-                System.exit(0);
-            }
-        });
-
     }
-    private void createUIComponents() {
+    private void createUIComponents()
+    {
         // Création des colonne du tableau
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("Article");
@@ -96,5 +78,14 @@ public class MainFrame extends  JFrame{
 
         table = new JTable(model);
         TabScollPane = new JScrollPane(table);
+    }
+
+    //Set Controller
+    public void setController(Controller c)
+    {
+        loginButton.addActionListener(c);
+        loginButton.setActionCommand("loginbutton");
+
+        getFrame().addWindowListener(c);
     }
 }
