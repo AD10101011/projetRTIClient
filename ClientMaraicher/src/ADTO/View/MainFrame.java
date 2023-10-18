@@ -34,9 +34,15 @@ public class MainFrame extends  JFrame
     private JButton supprimerArticleButton;
     private JButton confirmerAchatButton;
     private JTextField TotalTextField;
-    private JLabel imageLabel;
+    public JLabel imageLabel;
     private JButton acheterButton;
     private JScrollPane TabScollPane;
+
+
+
+
+
+
 
 
     //#region Propriétés (Getters)
@@ -61,9 +67,12 @@ public class MainFrame extends  JFrame
         // Affichage de la fenêtre
         frame = new JFrame("Le Maraicher d'abdel karim");
         frame.setContentPane(MainPanel);
+        frame.setMinimumSize(new Dimension(800,600));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+
 
         // A la Fermeture de l'application
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

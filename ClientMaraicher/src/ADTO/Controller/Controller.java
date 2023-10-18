@@ -111,6 +111,9 @@ public class Controller extends WindowAdapter implements ActionListener
             String userTxt = getMainFrame().getUserTextField().getText();
             String passwordTxt = getMainFrame().getPasswordTextField().getText();
             JOptionPane.showMessageDialog(null,"User : " + userTxt + "\nPassword : " + passwordTxt);
+            ImageIcon icon = new ImageIcon("C:\\Users\\La Pute A Nathan\\IdeaProjects\\projetRTIClient\\ClientMaraicher\\images\\concombre.jpg");
+            // Créez un JLabel avec l'icône
+            getMainFrame().imageLabel.setIcon(icon);
         }
 
     }
