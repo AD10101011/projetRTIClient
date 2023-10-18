@@ -112,6 +112,7 @@ public class Controller extends WindowAdapter implements ActionListener
             String passwordTxt = getMainFrame().getPasswordTextField().getText();
             JOptionPane.showMessageDialog(null,"User : " + userTxt + "\nPassword : " + passwordTxt);
         }
+
     }
 
     //A la fermeture de l'App
