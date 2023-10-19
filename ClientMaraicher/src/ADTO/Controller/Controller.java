@@ -22,6 +22,9 @@ public class Controller extends WindowAdapter implements ActionListener
     private MainFrame _mainFrame;
     private String _requete;
 
+    public DataOutputStream dos;
+    public DataInputStream dis;
+
     //#endregion
 
     //#region Propriétés (Getters et Setters)
@@ -93,8 +96,8 @@ public class Controller extends WindowAdapter implements ActionListener
         // Création des flux
         try
         {
-            DataOutputStream dos = new DataOutputStream(getSocket().getOutputStream());
-            DataInputStream dis = new DataInputStream(getSocket().getInputStream());
+            dos = new DataOutputStream(new BufferedOutputStream(getSocket().getOutputStream()));
+            dis = new DataInputStream(new BufferedInputStream(getSocket().getInputStream()));
         }
         catch (Exception e)
         {
@@ -106,15 +109,92 @@ public class Controller extends WindowAdapter implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
+        String reponse;
+        String[] reponseSplit;
+
         if(e.getActionCommand().equals("loginbutton"))
         {
             String userTxt = getMainFrame().getUserTextField().getText();
             String passwordTxt = getMainFrame().getPasswordTextField().getText();
-            JOptionPane.showMessageDialog(null,"User : " + userTxt + "\nPassword : " + passwordTxt);
-            ImageIcon icon = new ImageIcon("C:\\Users\\La Pute A Nathan\\IdeaProjects\\projetRTIClient\\ClientMaraicher\\images\\concombre.jpg");
-            // Créez un JLabel avec l'icône
-            getMainFrame().imageLabel.setIcon(icon);
+
+            if(userTxt.isEmpty())
+            {
+
+                if(passwordTxt.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un nom d'utilisateur et un mot de passe");
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un nom d'utilisateur");
+                }
+            }
+            else
+            {
+                if(passwordTxt.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un mot de passe");
+                }
+                else
+                {
+                    // Envoi de la requete
+                    if(getClient().getIsNewClient())
+                    {
+                        setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#oui");
+                        reponse = Echange();
+                        reponseSplit = reponse.split("#");
+
+                        if(reponseSplit[1].equals("ok")) {
+                            JOptionPane.showMessageDialog(null, "Création de compte réussie ! Bienvenue " + userTxt);
+                            consult_Article(1);
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "Création de compte échouée ! : " + reponseSplit[2]);
+                        }
+
+                    }
+                    else
+                    {
+                        setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#non)");
+                        reponse = Echange();
+                        reponseSplit = reponse.split("#");
+
+                        if(reponseSplit[1].equals("ok")) {
+                            JOptionPane.showMessageDialog(null, "Connexion réussie ! Bienvenue " + userTxt);
+                            consult_Article(1);
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "Connexion échouée : " + reponseSplit[2]);
+                        }
+                    }
+
+                }
+
+            }
+
         }
+
+        if(e.getActionCommand().equals("nouveauclientcheckbox"))
+        {
+            getClient().setIsNewClient(getMainFrame().nouveauClientCheckBox.isSelected());
+        }
+
+        if(e.getActionCommand().equals("logoutbutton"))
+        {
+            setRequete("LOGOUT#");
+            reponse = Echange();
+            reponseSplit = reponse.split("#");
+
+            if(reponseSplit[1].equals("ok"))
+            {
+                JOptionPane.showMessageDialog(null, "Déconnexion réussie !");
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Déconnexion échouée : " + reponseSplit[2]);
+            }
+        }
+
 
     }
 
@@ -135,4 +215,56 @@ public class Controller extends WindowAdapter implements ActionListener
         System.exit(0);
     }
     //#endregion
+
+    public String Echange()
+    {
+        // Envoi de la requete
+        try {
+            dos.write(getRequete().getBytes());
+            dos.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Lecture de la requête
+        StringBuffer buffer = new StringBuffer();
+        boolean EOT = false;
+        while(!EOT) // boucle de lecture byte par byte
+        {
+            try {
+
+
+                byte b1 = dis.readByte();
+                System.out.println("b1 : --" + (char) b1 + "--");
+                if (b1 == (byte) '/'){
+                    b1 = dis.readByte();
+                    if(b1 == (byte) '0') EOT = true;
+                } else buffer.append((char) b1);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String requete = buffer.toString();
+        System.out.println("Reçu : --" + requete + "--");
+
+
+
+        return requete;
+
+    }
+
+    public int consult_Article(int indice)
+    {
+        String reponse;
+        String[] reponseSplit;
+        setRequete("CONSULT#" + indice);
+        reponse = Echange();
+
+        reponseSplit = reponse.split("#");
+
+
+
+        return 1;
+    }
 }

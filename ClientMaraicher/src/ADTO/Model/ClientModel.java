@@ -9,8 +9,19 @@ public class ClientModel {
     // Variables membres de la classe
     private String nom;
     private String motDePasse;
+    private boolean isNewClient;
 
     // Getters et Setters
+
+    // isNewClient
+
+    public boolean getIsNewClient() {
+        return isNewClient;
+    }
+
+    public void setIsNewClient(boolean isNewClient) {
+        this.isNewClient = isNewClient;
+    }
 
     // Nom
 

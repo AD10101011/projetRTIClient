@@ -17,7 +17,7 @@ public class MainFrame extends  JFrame
     private JTextField PasswordTextField;
     private JButton loginButton;
     private JButton logoutButton;
-    private JCheckBox nouveauClientCheckBox;
+    public JCheckBox nouveauClientCheckBox;
     private JPanel ConnexionPanel;
     private JPanel MainPanel;
     private JLabel TitleLabel;
@@ -94,6 +94,12 @@ public class MainFrame extends  JFrame
     {
         loginButton.addActionListener(c);
         loginButton.setActionCommand("loginbutton");
+
+        nouveauClientCheckBox.addActionListener(c);
+        nouveauClientCheckBox.setActionCommand("nouveauclientcheckbox");
+
+        logoutButton.addActionListener(c);
+        logoutButton.setActionCommand("logoutbutton");
 
         getFrame().addWindowListener(c);
     }
