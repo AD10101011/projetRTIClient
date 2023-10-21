@@ -13,36 +13,32 @@ import java.sql.SQLException;
 public class MainFrame extends  JFrame
 {
     JFrame frame;
-    private JTextField UserTextField;
-    private JTextField PasswordTextField;
-    private JButton loginButton;
-    private JButton logoutButton;
+    public JTextField UserTextField;
+    public JTextField PasswordTextField;
+    public JButton loginButton;
+    public JButton logoutButton;
     public JCheckBox nouveauClientCheckBox;
-    private JPanel ConnexionPanel;
-    private JPanel MainPanel;
-    private JLabel TitleLabel;
-    private JPanel MagasinPanel;
-    private JTextField ArticleTextField;
-    private JTextField PrixUnitaireTextField;
-    private JTextField StockTextField;
-    private JSpinner QuantiteSpinner;
-    private JButton previousArticleButton;
-    private JButton nextArticleButton;
-    private JPanel PanierPanel;
-    private JTable table;
-    private JButton viderLePanierButton;
-    private JButton supprimerArticleButton;
-    private JButton confirmerAchatButton;
-    private JTextField TotalTextField;
+    public JPanel ConnexionPanel;
+    public JPanel MainPanel;
+    public JLabel TitleLabel;
+    public JPanel MagasinPanel;
+    public JTextField ArticleTextField;
+
+    public DefaultTableModel model;
+    public JTextField PrixUnitaireTextField;
+    public JTextField StockTextField;
+    public JSpinner QuantiteSpinner;
+    public JButton previousArticleButton;
+    public JButton nextArticleButton;
+    public JPanel PanierPanel;
+    public JTable table;
+    public JButton viderLePanierButton;
+    public JButton supprimerArticleButton;
+    public JButton confirmerAchatButton;
+    public JTextField TotalTextField;
     public JLabel imageLabel;
-    private JButton acheterButton;
-    private JScrollPane TabScollPane;
-
-
-
-
-
-
+    public JButton acheterButton;
+    public JScrollPane TabScollPane;
 
 
     //#region Propriétés (Getters)
@@ -80,7 +76,7 @@ public class MainFrame extends  JFrame
     private void createUIComponents()
     {
         // Création des colonne du tableau
-        DefaultTableModel model = new DefaultTableModel();
+        model = new DefaultTableModel();
         model.addColumn("Article");
         model.addColumn("Prix Unitaire");
         model.addColumn("Quantité");
@@ -100,6 +96,15 @@ public class MainFrame extends  JFrame
 
         logoutButton.addActionListener(c);
         logoutButton.setActionCommand("logoutbutton");
+
+        nextArticleButton.addActionListener(c);
+        nextArticleButton.setActionCommand("nextarticlebutton");
+
+        previousArticleButton.addActionListener(c);
+        previousArticleButton.setActionCommand("previousarticlebutton");
+
+        acheterButton.addActionListener(c);
+        acheterButton.setActionCommand("acheterbutton");
 
         getFrame().addWindowListener(c);
     }

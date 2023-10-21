@@ -10,6 +10,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 
 public class Controller extends WindowAdapter implements ActionListener
@@ -24,6 +26,10 @@ public class Controller extends WindowAdapter implements ActionListener
 
     public DataOutputStream dos;
     public DataInputStream dis;
+
+    private int indiceArticle = 1;
+
+    private float total = 0;
 
     //#endregion
 
@@ -146,7 +152,7 @@ public class Controller extends WindowAdapter implements ActionListener
 
                         if(reponseSplit[1].equals("ok")) {
                             JOptionPane.showMessageDialog(null, "Création de compte réussie ! Bienvenue " + userTxt);
-                            consult_Article(1);
+                            consult_Article(indiceArticle);
                         }
                         else {
                             JOptionPane.showMessageDialog(null, "Création de compte échouée ! : " + reponseSplit[2]);
@@ -161,7 +167,7 @@ public class Controller extends WindowAdapter implements ActionListener
 
                         if(reponseSplit[1].equals("ok")) {
                             JOptionPane.showMessageDialog(null, "Connexion réussie ! Bienvenue " + userTxt);
-                            consult_Article(1);
+                            consult_Article(indiceArticle);
                         }
                         else {
                             JOptionPane.showMessageDialog(null, "Connexion échouée : " + reponseSplit[2]);
@@ -188,6 +194,7 @@ public class Controller extends WindowAdapter implements ActionListener
             if(reponseSplit[1].equals("ok"))
             {
                 JOptionPane.showMessageDialog(null, "Déconnexion réussie !");
+                windowClosing(null);
             }
             else
             {
@@ -195,6 +202,81 @@ public class Controller extends WindowAdapter implements ActionListener
             }
         }
 
+        if(e.getActionCommand().equals("nextarticlebutton"))
+        {
+            indiceArticle++;
+            if(consult_Article(indiceArticle) != 1)
+            {
+                indiceArticle--;
+            }
+        }
+
+        if(e.getActionCommand().equals("previousarticlebutton"))
+        {
+            indiceArticle--;
+            if(consult_Article(indiceArticle) != 1)
+            {
+                indiceArticle++;
+            }
+        }
+
+        if(e.getActionCommand().equals("acheterbutton"))
+        {
+            String intitule;
+            String quantite,nbrArticle;
+            String prix;
+
+            if((int) getMainFrame().QuantiteSpinner.getValue() <= 0)
+            {
+                JOptionPane.showMessageDialog(null, "Veuillez entrer une quantité supérieure à 0");
+            }
+
+            setRequete("ACHAT#" + indiceArticle + "#" + getMainFrame().QuantiteSpinner.getValue());
+
+            reponse = Echange();
+
+            reponseSplit = reponse.split("#");
+
+            if(reponseSplit[1].equals("-2"))
+            {
+                JOptionPane.showMessageDialog(null,"ACHAT REFUSE, Caddie Rempli !");
+            } else if (reponseSplit[1].equals("-1")) {
+                JOptionPane.showMessageDialog(null,"ACHAT REFUSE, Article Inexistant !");
+
+            } else if (reponseSplit[2].equals("0")) {
+                    JOptionPane.showMessageDialog(null, "CHAT REFUSE, Quantite Insufisante !");
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null,"ACHAT REUSSI !, Merci pour votre achat !");
+                quantite = reponseSplit[2];
+                prix = remplacePointparVirgule(reponseSplit[3]);
+
+                // MAJ DU PRIX TOTAL
+                total += Integer.parseInt(quantite) * Float.parseFloat(prix);
+                getMainFrame().TotalTextField.setText(String.valueOf(total));
+
+                // MAJ DE L'INTERFACE D'ACHAT
+
+                consult_Article(indiceArticle);
+
+                /* MAJ DU CADDIE
+                setRequete("CADDIE#");
+                reponse = Echange();
+                reponseSplit = reponse.split("#");
+                nbrArticle = reponseSplit[1];
+
+                for(int i = 0; i < Integer.parseInt(nbrArticle); i++)
+                {
+                    intitule = reponseSplit[2 + (i * 3)];
+                    prix = reponseSplit[3 + (i * 3)];
+                    quantite = reponseSplit[3 + (i * 3)];
+
+                    ajouteArticleCaddie(intitule,prix,quantite);
+                }
+                */
+            }
+        }
 
     }
 
@@ -256,15 +338,61 @@ public class Controller extends WindowAdapter implements ActionListener
 
     public int consult_Article(int indice)
     {
-        String reponse;
+        String reponse , intitule,image,prix,stock;
         String[] reponseSplit;
+
         setRequete("CONSULT#" + indice);
         reponse = Echange();
 
         reponseSplit = reponse.split("#");
 
+        if(reponseSplit.length != 6)
+        {
+            JOptionPane.showMessageDialog(null, "Article introuvable");
+            return 0;
+        }
+        else
+        {
+            intitule = reponseSplit[2];
+            prix = remplacePointparVirgule(reponseSplit[3]);
+            stock = reponseSplit[4];
+            image = "C:\\Users\\La Pute A Nathan\\IdeaProjects\\projetRTIClient\\ClientMaraicher\\images\\" + reponseSplit[5];
+            //Path path = Paths.get(image);
+            //System.out.println(path.toAbsolutePath());
+            setArticle(intitule,prix,stock,image);
 
+            return 1;
+        }
+    }
 
-        return 1;
+    public String remplacePointparVirgule(String prix)
+    {
+        String prixVirgule = "";
+        for(int i = 0; i < prix.length(); i++)
+        {
+            if(prix.charAt(i) == '.')
+            {
+                prixVirgule += ',';
+            }
+            else
+            {
+                prixVirgule += prix.charAt(i);
+            }
+        }
+        return prixVirgule;
+    }
+
+    public void setArticle(String intitule, String prix, String stock, String image)
+    {
+        getMainFrame().ArticleTextField.setText(intitule);
+        getMainFrame().PrixUnitaireTextField.setText(prix);
+        getMainFrame().StockTextField.setText(stock);
+        System.out.println(image);
+        getMainFrame().imageLabel.setIcon(new ImageIcon(image));
+    }
+
+    public void ajouteArticleCaddie(String intitule, String prix, String quantite)
+    {
+        getMainFrame().model.addRow(new Object[]{intitule,prix,quantite});
     }
 }
