@@ -27,7 +27,7 @@ public class MainFrame extends  JFrame
     public DefaultTableModel model;
     public JTextField PrixUnitaireTextField;
     public JTextField StockTextField;
-    public JSpinner QuantiteSpinner;
+    public JSpinner quantiteSpinner;
     public JButton previousArticleButton;
     public JButton nextArticleButton;
     public JPanel PanierPanel;

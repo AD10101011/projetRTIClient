@@ -10,6 +10,7 @@ public class ClientModel {
     private String nom;
     private String motDePasse;
     private boolean isNewClient;
+    private boolean connect;
 
     // Getters et Setters
 
@@ -43,12 +44,17 @@ public class ClientModel {
         this.motDePasse = motDePasse;
     }
 
+    public void setConnect(boolean connect) { this.connect = connect; }
+
+    public boolean getConnect() { return connect; }
+
 
     // Constructeur
     public ClientModel()
     {
-        nom = "";
-        motDePasse = "";
+        this.nom = "";
+        this.motDePasse = "";
+        this.connect = false;
     }
 
     // Méthode de connexion au serveur

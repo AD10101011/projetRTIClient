@@ -31,6 +31,9 @@ public class Controller extends WindowAdapter implements ActionListener
 
     private float total = 0;
 
+    public String reponse;
+    public String[] reponseSplit;
+
     //#endregion
 
     //#region Propriétés (Getters et Setters)
@@ -99,6 +102,8 @@ public class Controller extends WindowAdapter implements ActionListener
         setCon(con);
         setSocket(socket);
 
+        logoutOk();
+
         // Création des flux
         try
         {
@@ -115,9 +120,6 @@ public class Controller extends WindowAdapter implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        String reponse;
-        String[] reponseSplit;
-
         if(e.getActionCommand().equals("loginbutton"))
         {
             String userTxt = getMainFrame().getUserTextField().getText();
@@ -125,7 +127,6 @@ public class Controller extends WindowAdapter implements ActionListener
 
             if(userTxt.isEmpty())
             {
-
                 if(passwordTxt.isEmpty())
                 {
                     JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un nom d'utilisateur et un mot de passe");
@@ -146,13 +147,15 @@ public class Controller extends WindowAdapter implements ActionListener
                     // Envoi de la requete
                     if(getClient().getIsNewClient())
                     {
+                        loginOk();
+                        getClient().setConnect(true);
                         setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#oui");
                         reponse = Echange();
                         reponseSplit = reponse.split("#");
 
                         if(reponseSplit[1].equals("ok")) {
                             JOptionPane.showMessageDialog(null, "Création de compte réussie ! Bienvenue " + userTxt);
-                            consult_Article(indiceArticle);
+                            //consult_Article(indiceArticle);
                         }
                         else {
                             JOptionPane.showMessageDialog(null, "Création de compte échouée ! : " + reponseSplit[2]);
@@ -161,8 +164,11 @@ public class Controller extends WindowAdapter implements ActionListener
                     }
                     else
                     {
-                        setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#non)");
+                        loginOk();
+                        getClient().setConnect(true);
+                        setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#non");
                         reponse = Echange();
+
                         reponseSplit = reponse.split("#");
 
                         if(reponseSplit[1].equals("ok")) {
@@ -187,19 +193,7 @@ public class Controller extends WindowAdapter implements ActionListener
 
         if(e.getActionCommand().equals("logoutbutton"))
         {
-            setRequete("LOGOUT#");
-            reponse = Echange();
-            reponseSplit = reponse.split("#");
-
-            if(reponseSplit[1].equals("ok"))
-            {
-                JOptionPane.showMessageDialog(null, "Déconnexion réussie !");
-                windowClosing(null);
-            }
-            else
-            {
-                JOptionPane.showMessageDialog(null, "Déconnexion échouée : " + reponseSplit[2]);
-            }
+            on_pushButtonLogout_clicked();
         }
 
         if(e.getActionCommand().equals("nextarticlebutton"))
@@ -223,15 +217,17 @@ public class Controller extends WindowAdapter implements ActionListener
         if(e.getActionCommand().equals("acheterbutton"))
         {
             String intitule;
-            String quantite,nbrArticle;
+            String quantite;
             String prix;
+            int nbrArticle;
 
-            if((int) getMainFrame().QuantiteSpinner.getValue() <= 0)
+            if((int) getMainFrame().quantiteSpinner.getValue() <= 0)
             {
                 JOptionPane.showMessageDialog(null, "Veuillez entrer une quantité supérieure à 0");
+                return;
             }
 
-            setRequete("ACHAT#" + indiceArticle + "#" + getMainFrame().QuantiteSpinner.getValue());
+            setRequete("ACHAT#" + indiceArticle + "#" + getMainFrame().quantiteSpinner.getValue());
 
             reponse = Echange();
 
@@ -244,7 +240,7 @@ public class Controller extends WindowAdapter implements ActionListener
                 JOptionPane.showMessageDialog(null,"ACHAT REFUSE, Article Inexistant !");
 
             } else if (reponseSplit[2].equals("0")) {
-                    JOptionPane.showMessageDialog(null, "CHAT REFUSE, Quantite Insufisante !");
+                    JOptionPane.showMessageDialog(null, "ACHAT REFUSE, Quantite Insufisante !");
             }
             else
             {
@@ -253,31 +249,31 @@ public class Controller extends WindowAdapter implements ActionListener
                 prix = remplacePointparVirgule(reponseSplit[3]);
 
                 // MAJ DU PRIX TOTAL
-                total += Integer.parseInt(quantite) * Float.parseFloat(prix);
+                total += Integer.parseInt(quantite) * Float.parseFloat(reponseSplit[3]);
                 getMainFrame().TotalTextField.setText(String.valueOf(total));
 
                 // MAJ DE L'INTERFACE D'ACHAT
 
                 consult_Article(indiceArticle);
 
-                /* MAJ DU CADDIE
+                //MAJ DU CADDIE
                 setRequete("CADDIE#");
                 reponse = Echange();
                 reponseSplit = reponse.split("#");
-                nbrArticle = reponseSplit[1];
+                nbrArticle = Integer.parseInt(reponseSplit[1]);
 
-                for(int i = 0; i < Integer.parseInt(nbrArticle); i++)
+                getMainFrame().model.setRowCount(0);
+
+                for(int i = 0; i < nbrArticle; i++)
                 {
                     intitule = reponseSplit[2 + (i * 3)];
                     prix = reponseSplit[3 + (i * 3)];
-                    quantite = reponseSplit[3 + (i * 3)];
+                    quantite = reponseSplit[4 + (i * 3)];
 
                     ajouteArticleCaddie(intitule,prix,quantite);
                 }
-                */
             }
         }
-
     }
 
     //A la fermeture de l'App
@@ -285,6 +281,10 @@ public class Controller extends WindowAdapter implements ActionListener
     public void windowClosing(WindowEvent e)
     {
         System.out.println("Fermeture de l'application");
+        if(getClient().getConnect() == true)
+        {
+            on_pushButtonLogout_clicked();
+        }
 
         try {
             getSocket().close();
@@ -298,42 +298,42 @@ public class Controller extends WindowAdapter implements ActionListener
     }
     //#endregion
 
-    public String Echange()
-    {
+    public String Echange() {
         // Envoi de la requete
         try {
+            dos.write(String.format("%04d", getRequete().length()).getBytes()); //Entete
             dos.write(getRequete().getBytes());
             dos.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        } catch (IOException e) { throw new RuntimeException(e); }
+        System.out.println("Envoye : " + getRequete());
 
-        // Lecture de la requête
-        StringBuffer buffer = new StringBuffer();
-        boolean EOT = false;
-        while(!EOT) // boucle de lecture byte par byte
+        // Lecture de l'entete de la requête
+        StringBuffer bufferTaille = new StringBuffer();
+        for(int i=0; i < 4; i++)
         {
             try {
+                byte b = dis.readByte();
+                bufferTaille.append((char) b);
+            } catch (IOException e) { throw new RuntimeException(e); }
+        }
+        int tailleRequete = Integer.parseInt(bufferTaille.toString());
+        System.out.println("Taille de la Requete : " + tailleRequete);
 
-
+        //Lecture des données la requete
+        StringBuffer buffer = new StringBuffer();
+        for(int i=0; i < tailleRequete; i++) // boucle de lecture byte par byte
+        {
+            try {
                 byte b1 = dis.readByte();
                 System.out.println("b1 : --" + (char) b1 + "--");
-                if (b1 == (byte) '/'){
-                    b1 = dis.readByte();
-                    if(b1 == (byte) '0') EOT = true;
-                } else buffer.append((char) b1);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+                buffer.append((char) b1);
+            } catch (IOException e) { throw new RuntimeException(e); }
         }
 
         String requete = buffer.toString();
         System.out.println("Reçu : --" + requete + "--");
 
-
-
         return requete;
-
     }
 
     public int consult_Article(int indice)
@@ -356,7 +356,7 @@ public class Controller extends WindowAdapter implements ActionListener
             intitule = reponseSplit[2];
             prix = remplacePointparVirgule(reponseSplit[3]);
             stock = reponseSplit[4];
-            image = "C:\\Users\\La Pute A Nathan\\IdeaProjects\\projetRTIClient\\ClientMaraicher\\images\\" + reponseSplit[5];
+            image = "images/" + reponseSplit[5];
             //Path path = Paths.get(image);
             //System.out.println(path.toAbsolutePath());
             setArticle(intitule,prix,stock,image);
@@ -394,5 +394,50 @@ public class Controller extends WindowAdapter implements ActionListener
     public void ajouteArticleCaddie(String intitule, String prix, String quantite)
     {
         getMainFrame().model.addRow(new Object[]{intitule,prix,quantite});
+    }
+
+    public void logoutOk()
+    {
+        getMainFrame().loginButton.setEnabled(true);
+        getMainFrame().logoutButton.setEnabled(false);
+        getMainFrame().nextArticleButton.setEnabled(false);
+        getMainFrame().previousArticleButton.setEnabled(false);
+        getMainFrame().acheterButton.setEnabled(false);
+        getMainFrame().confirmerAchatButton.setEnabled(false);
+        getMainFrame().viderLePanierButton.setEnabled(false);
+        getMainFrame().supprimerArticleButton.setEnabled(false);
+        getMainFrame().nouveauClientCheckBox.setEnabled(true);
+        getMainFrame().quantiteSpinner.setEnabled(false);
+    }
+    public void loginOk()
+    {
+        getMainFrame().loginButton.setEnabled(false);
+        getMainFrame().logoutButton.setEnabled(true);
+        getMainFrame().nextArticleButton.setEnabled(true);
+        getMainFrame().previousArticleButton.setEnabled(true);
+        getMainFrame().acheterButton.setEnabled(true);
+        getMainFrame().confirmerAchatButton.setEnabled(true);
+        getMainFrame().viderLePanierButton.setEnabled(true);
+        getMainFrame().supprimerArticleButton.setEnabled(true);
+        getMainFrame().nouveauClientCheckBox.setEnabled(false);
+        getMainFrame().quantiteSpinner.setEnabled(true);
+    }
+
+    public void on_pushButtonLogout_clicked()
+    {
+        setRequete("LOGOUT#");
+        reponse = Echange();
+        reponseSplit = reponse.split("#");
+
+        if(reponseSplit[1].equals("ok"))
+        {
+            JOptionPane.showMessageDialog(null, "Déconnexion réussie !");
+            logoutOk();
+            getClient().setConnect(false);
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(null, "Déconnexion échouée : " + reponseSplit[2]);
+        }
     }
 }
