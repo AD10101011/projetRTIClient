@@ -106,6 +106,15 @@ public class MainFrame extends  JFrame
         acheterButton.addActionListener(c);
         acheterButton.setActionCommand("acheterbutton");
 
+        viderLePanierButton.addActionListener(c);
+        viderLePanierButton.setActionCommand("viderlepanierbutton");
+
+        supprimerArticleButton.addActionListener(c);
+        supprimerArticleButton.setActionCommand("supprimerarticlebutton");
+
+        confirmerAchatButton.addActionListener(c);
+        confirmerAchatButton.setActionCommand("confirmerachatbutton");
+
         getFrame().addWindowListener(c);
     }
 }

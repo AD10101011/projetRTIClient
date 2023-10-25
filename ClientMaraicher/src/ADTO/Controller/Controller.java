@@ -122,68 +122,7 @@ public class Controller extends WindowAdapter implements ActionListener
     {
         if(e.getActionCommand().equals("loginbutton"))
         {
-            String userTxt = getMainFrame().getUserTextField().getText();
-            String passwordTxt = getMainFrame().getPasswordTextField().getText();
-
-            if(userTxt.isEmpty())
-            {
-                if(passwordTxt.isEmpty())
-                {
-                    JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un nom d'utilisateur et un mot de passe");
-                }
-                else
-                {
-                    JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un nom d'utilisateur");
-                }
-            }
-            else
-            {
-                if(passwordTxt.isEmpty())
-                {
-                    JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un mot de passe");
-                }
-                else
-                {
-                    // Envoi de la requete
-                    if(getClient().getIsNewClient())
-                    {
-                        loginOk();
-                        getClient().setConnect(true);
-                        setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#oui");
-                        reponse = Echange();
-                        reponseSplit = reponse.split("#");
-
-                        if(reponseSplit[1].equals("ok")) {
-                            JOptionPane.showMessageDialog(null, "Création de compte réussie ! Bienvenue " + userTxt);
-                            //consult_Article(indiceArticle);
-                        }
-                        else {
-                            JOptionPane.showMessageDialog(null, "Création de compte échouée ! : " + reponseSplit[2]);
-                        }
-
-                    }
-                    else
-                    {
-                        loginOk();
-                        getClient().setConnect(true);
-                        setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#non");
-                        reponse = Echange();
-
-                        reponseSplit = reponse.split("#");
-
-                        if(reponseSplit[1].equals("ok")) {
-                            JOptionPane.showMessageDialog(null, "Connexion réussie ! Bienvenue " + userTxt);
-                            consult_Article(indiceArticle);
-                        }
-                        else {
-                            JOptionPane.showMessageDialog(null, "Connexion échouée : " + reponseSplit[2]);
-                        }
-                    }
-
-                }
-
-            }
-
+            on_pushButtonLogin_clicked();
         }
 
         if(e.getActionCommand().equals("nouveauclientcheckbox"))
@@ -216,63 +155,22 @@ public class Controller extends WindowAdapter implements ActionListener
 
         if(e.getActionCommand().equals("acheterbutton"))
         {
-            String intitule;
-            String quantite;
-            String prix;
-            int nbrArticle;
+            on_pushButtonAcheter_clicked();
+        }
 
-            if((int) getMainFrame().quantiteSpinner.getValue() <= 0)
-            {
-                JOptionPane.showMessageDialog(null, "Veuillez entrer une quantité supérieure à 0");
-                return;
-            }
+        if(e.getActionCommand().equals("confirmerachatbutton"))
+        {
+            on_pushButtonConfirmerAchat_clicked();
+        }
 
-            setRequete("ACHAT#" + indiceArticle + "#" + getMainFrame().quantiteSpinner.getValue());
+        if(e.getActionCommand().equals("viderlepanierbutton"))
+        {
+            on_pushButtonViderLePanier_clicked();
+        }
 
-            reponse = Echange();
-
-            reponseSplit = reponse.split("#");
-
-            if(reponseSplit[1].equals("-2"))
-            {
-                JOptionPane.showMessageDialog(null,"ACHAT REFUSE, Caddie Rempli !");
-            } else if (reponseSplit[1].equals("-1")) {
-                JOptionPane.showMessageDialog(null,"ACHAT REFUSE, Article Inexistant !");
-
-            } else if (reponseSplit[2].equals("0")) {
-                    JOptionPane.showMessageDialog(null, "ACHAT REFUSE, Quantite Insufisante !");
-            }
-            else
-            {
-                JOptionPane.showMessageDialog(null,"ACHAT REUSSI !, Merci pour votre achat !");
-                quantite = reponseSplit[2];
-                prix = remplacePointparVirgule(reponseSplit[3]);
-
-                // MAJ DU PRIX TOTAL
-                total += Integer.parseInt(quantite) * Float.parseFloat(reponseSplit[3]);
-                getMainFrame().TotalTextField.setText(String.valueOf(total));
-
-                // MAJ DE L'INTERFACE D'ACHAT
-
-                consult_Article(indiceArticle);
-
-                //MAJ DU CADDIE
-                setRequete("CADDIE#");
-                reponse = Echange();
-                reponseSplit = reponse.split("#");
-                nbrArticle = Integer.parseInt(reponseSplit[1]);
-
-                getMainFrame().model.setRowCount(0);
-
-                for(int i = 0; i < nbrArticle; i++)
-                {
-                    intitule = reponseSplit[2 + (i * 3)];
-                    prix = reponseSplit[3 + (i * 3)];
-                    quantite = reponseSplit[4 + (i * 3)];
-
-                    ajouteArticleCaddie(intitule,prix,quantite);
-                }
-            }
+        if(e.getActionCommand().equals("supprimerarticlebutton"))
+        {
+            on_pushButtonSupprimerArticle_clicked();
         }
     }
 
@@ -396,6 +294,11 @@ public class Controller extends WindowAdapter implements ActionListener
         getMainFrame().model.addRow(new Object[]{intitule,prix,quantite});
     }
 
+    public void setTotalTextField(int total)
+    {
+        getMainFrame().TotalTextField.setText(String.valueOf(total));
+    }
+
     public void logoutOk()
     {
         getMainFrame().loginButton.setEnabled(true);
@@ -425,6 +328,8 @@ public class Controller extends WindowAdapter implements ActionListener
 
     public void on_pushButtonLogout_clicked()
     {
+        on_pushButtonViderLePanier_clicked();
+
         setRequete("LOGOUT#");
         reponse = Echange();
         reponseSplit = reponse.split("#");
@@ -440,4 +345,155 @@ public class Controller extends WindowAdapter implements ActionListener
             JOptionPane.showMessageDialog(null, "Déconnexion échouée : " + reponseSplit[2]);
         }
     }
+
+    public void on_pushButtonLogin_clicked()
+    {
+        String userTxt = getMainFrame().getUserTextField().getText();
+        String passwordTxt = getMainFrame().getPasswordTextField().getText();
+
+        if(userTxt.isEmpty())
+        {
+            if(passwordTxt.isEmpty())
+            {
+                JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un nom d'utilisateur et un mot de passe");
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un nom d'utilisateur");
+            }
+        }
+        else
+        {
+            if(passwordTxt.isEmpty())
+            {
+                JOptionPane.showMessageDialog(getMainFrame().getFrame(),"Veuillez entrer un mot de passe");
+            }
+            else
+            {
+                // Envoi de la requete
+                if(getClient().getIsNewClient())
+                {
+                    loginOk();
+                    getClient().setConnect(true);
+                    setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#oui");
+                    reponse = Echange();
+                    reponseSplit = reponse.split("#");
+
+                    if(reponseSplit[1].equals("ok")) {
+                        JOptionPane.showMessageDialog(null, "Création de compte réussie ! Bienvenue " + userTxt);
+                        //consult_Article(indiceArticle);
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null, "Création de compte échouée ! : " + reponseSplit[2]);
+                    }
+
+                }
+                else
+                {
+                    loginOk();
+                    getClient().setConnect(true);
+                    setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#non");
+                    reponse = Echange();
+
+                    reponseSplit = reponse.split("#");
+
+                    if(reponseSplit[1].equals("ok")) {
+                        JOptionPane.showMessageDialog(null, "Connexion réussie ! Bienvenue " + userTxt);
+                        consult_Article(indiceArticle);
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null, "Connexion échouée : " + reponseSplit[2]);
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    public void on_pushButtonAcheter_clicked()
+    {
+        String intitule;
+        String quantite;
+        String prix;
+        int nbrArticle;
+
+        if((int) getMainFrame().quantiteSpinner.getValue() <= 0)
+        {
+            JOptionPane.showMessageDialog(null, "Veuillez entrer une quantité supérieure à 0");
+            return;
+        }
+
+        setRequete("ACHAT#" + indiceArticle + "#" + getMainFrame().quantiteSpinner.getValue());
+
+        reponse = Echange();
+
+        reponseSplit = reponse.split("#");
+
+        if(reponseSplit[1].equals("-2"))
+        {
+            JOptionPane.showMessageDialog(null,"ACHAT REFUSE, Caddie Rempli !");
+        } else if (reponseSplit[1].equals("-1")) {
+            JOptionPane.showMessageDialog(null,"ACHAT REFUSE, Article Inexistant !");
+
+        } else if (reponseSplit[2].equals("0")) {
+            JOptionPane.showMessageDialog(null, "ACHAT REFUSE, Quantite Insufisante !");
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(null,"ACHAT REUSSI !, Merci pour votre achat !");
+            quantite = reponseSplit[2];
+            prix = remplacePointparVirgule(reponseSplit[3]);
+
+            // MAJ DU PRIX TOTAL
+            total += Integer.parseInt(quantite) * Float.parseFloat(reponseSplit[3]);
+            getMainFrame().TotalTextField.setText(String.valueOf(total));
+
+            // MAJ DE L'INTERFACE D'ACHAT
+
+            consult_Article(indiceArticle);
+
+            //MAJ DU CADDIE
+            setRequete("CADDIE#");
+            reponse = Echange();
+            reponseSplit = reponse.split("#");
+            nbrArticle = Integer.parseInt(reponseSplit[1]);
+
+            getMainFrame().model.setRowCount(0); //Vide le tableau
+
+            for(int i = 0; i < nbrArticle; i++)
+            {
+                intitule = reponseSplit[2 + (i * 3)];
+                prix = reponseSplit[3 + (i * 3)];
+                quantite = reponseSplit[4 + (i * 3)];
+
+                ajouteArticleCaddie(intitule,prix,quantite);
+            }
+        }
+    }
+
+    public void on_pushButtonConfirmerAchat_clicked()
+    {
+        getMainFrame().model.setRowCount(0);
+        setRequete("CONFIRMER");
+        Echange();
+        setTotalTextField(0);
+        total = 0;
+    }
+
+    public void on_pushButtonViderLePanier_clicked()
+    {
+        getMainFrame().model.setRowCount(0);
+        setRequete("CANCELALL");
+        Echange();
+        setTotalTextField(0);
+        total = 0;
+        consult_Article(indiceArticle);
+    }
+
+    public void on_pushButtonSupprimerArticle_clicked()
+    {
+
+    }
+
 }

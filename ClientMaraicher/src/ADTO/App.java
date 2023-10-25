@@ -34,11 +34,11 @@ public class App {
         MainFrame window = new MainFrame();
 
         // Connexion au serveur
-        Socket socket = client.ConnexionToServer("192.168.175.128",50000);
+        Socket socket = client.ConnexionToServer("192.168.89.128",50000);
         System.out.println("Connexion au serveur réussie");
 
         // Connexion à la base de données
-        new ConnectionFactory("com.mysql.cj.jdbc.Driver","PassStudent1_","Student","jdbc:mysql://192.168.175.128:3306/PourStudent");
+        new ConnectionFactory("com.mysql.cj.jdbc.Driver","PassStudent1_","Student","jdbc:mysql://192.168.89.128:3306/PourStudent");
         Connection con = ConnectionFactory.createConnection();
         System.out.println("Connexion à la base de données réussie");
 
