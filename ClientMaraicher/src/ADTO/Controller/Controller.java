@@ -292,6 +292,7 @@ public class Controller extends WindowAdapter implements ActionListener
     public void ajouteArticleCaddie(String intitule, String prix, String quantite)
     {
         getMainFrame().model.addRow(new Object[]{intitule,prix,quantite});
+
     }
 
     public void setTotalTextField(int total)
@@ -415,7 +416,8 @@ public class Controller extends WindowAdapter implements ActionListener
     {
         String intitule;
         String quantite;
-        String prix;
+        float prix;
+        String prixFormater;
         int nbrArticle;
 
         if((int) getMainFrame().quantiteSpinner.getValue() <= 0)
@@ -443,7 +445,6 @@ public class Controller extends WindowAdapter implements ActionListener
         {
             JOptionPane.showMessageDialog(null,"ACHAT REUSSI !, Merci pour votre achat !");
             quantite = reponseSplit[2];
-            prix = remplacePointparVirgule(reponseSplit[3]);
 
             // MAJ DU PRIX TOTAL
             total += Integer.parseInt(quantite) * Float.parseFloat(reponseSplit[3]);
@@ -464,10 +465,10 @@ public class Controller extends WindowAdapter implements ActionListener
             for(int i = 0; i < nbrArticle; i++)
             {
                 intitule = reponseSplit[2 + (i * 3)];
-                prix = reponseSplit[3 + (i * 3)];
+                prix = Float.parseFloat(reponseSplit[3 + (i * 3)]);
                 quantite = reponseSplit[4 + (i * 3)];
-
-                ajouteArticleCaddie(intitule,prix,quantite);
+                prixFormater = String.format("%.2f",prix);
+                ajouteArticleCaddie(intitule,prixFormater,quantite);
             }
         }
     }
@@ -493,7 +494,50 @@ public class Controller extends WindowAdapter implements ActionListener
 
     public void on_pushButtonSupprimerArticle_clicked()
     {
+        int indice;
 
+
+
+        if((indice = getMainFrame().model.getRowCount()) == 0)
+        {
+            JOptionPane.showMessageDialog(null,"Veuillez sélectionner un article à supprimer");
+            return;
+        }
+        else{
+            String intitule , reponse, prixFormater, quantite;
+            int nbrArticle;
+            float prix;
+            String[] reponseSplit;
+            indice--;
+            setRequete("Cancel#" + indice);
+            reponse = Echange();
+            reponseSplit = reponse.split("#");
+            if(reponseSplit[1].equals("oui"))
+            {
+                getMainFrame().model.setRowCount(0);
+                setRequete("CADDIE#");
+                reponse = Echange();
+                reponseSplit = reponse.split("#");
+
+                nbrArticle = Integer.parseInt(reponseSplit[1]);
+                total = 0;
+
+                for(int i = 0; i < nbrArticle; i++)
+                {
+                    intitule = reponseSplit[2 + (i * 3)];
+                    prix = Float.parseFloat(reponseSplit[3 + (i * 3)]);
+                    quantite = reponseSplit[4 + (i * 3)];
+                    prixFormater = String.format("%.2f",prix);
+                    ajouteArticleCaddie(intitule,prixFormater,quantite);
+                }
+
+
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null,"Suppression échouée");
+            }
+        }
     }
 
 }

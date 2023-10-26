@@ -321,8 +321,20 @@
                   <component id="fb59c" class="javax.swing.JTable" binding="table" custom-create="true">
                     <constraints/>
                     <properties>
-                      <enabled value="false"/>
+                      <cellSelectionEnabled value="false"/>
+                      <columnSelectionAllowed value="false"/>
+                      <dropMode value="USE_SELECTION"/>
+                      <editingColumn value="-1"/>
+                      <editingRow value="-1"/>
+                      <enabled value="true"/>
+                      <fillsViewportHeight value="true"/>
+                      <rowSelectionAllowed value="true"/>
+                      <selectionBackground color="-10530129"/>
                     </properties>
+                    <clientProperties>
+                      <JTable.autoStartsEdit class="java.lang.Boolean" value="false"/>
+                      <terminateEditOnFocusLost class="java.lang.Boolean" value="false"/>
+                    </clientProperties>
                   </component>
                 </children>
               </scrollpane>

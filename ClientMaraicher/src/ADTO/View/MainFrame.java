@@ -3,6 +3,7 @@ package ADTO.View;
 import ADTO.Controller.Controller;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -76,12 +77,26 @@ public class MainFrame extends  JFrame
     private void createUIComponents()
     {
         // Création des colonne du tableau
-        model = new DefaultTableModel();
-        model.addColumn("Article");
-        model.addColumn("Prix Unitaire");
-        model.addColumn("Quantité");
+        model = new DefaultTableModel(null, new String[]{"Article", "Prix Unitaire", "Quantité"})
+        {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
-        table = new JTable(model);
+        // Création du tableau
+        table = new JTable();
+        table.setModel(model);
+
+        // Centrer les données du tableau
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < model.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        // Création du scrollPane
         TabScollPane = new JScrollPane(table);
     }
 
