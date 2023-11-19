@@ -236,7 +236,6 @@ public class Controller extends WindowAdapter implements ActionListener
                 // Envoi de la requete
                 if(getClient().getIsNewClient())
                 {
-                    loginOk();
                     getClient().setConnect(true);
                     setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#oui");
                     reponse = Echange();
@@ -244,6 +243,7 @@ public class Controller extends WindowAdapter implements ActionListener
 
                     if(reponseSplit[1].equals("ok")) {
                         JOptionPane.showMessageDialog(null, "Création de compte réussie ! Bienvenue " + userTxt);
+                        loginOk();
                         //consult_Article(indiceArticle);
                     }
                     else {
@@ -252,7 +252,6 @@ public class Controller extends WindowAdapter implements ActionListener
                 }
                 else
                 {
-                    loginOk();
                     getClient().setConnect(true);
                     setRequete("LOGIN#" + userTxt + "#" + passwordTxt + "#non");
                     reponse = Echange();
@@ -261,6 +260,7 @@ public class Controller extends WindowAdapter implements ActionListener
 
                     if(reponseSplit[1].equals("ok")) {
                         JOptionPane.showMessageDialog(null, "Connexion réussie ! Bienvenue " + userTxt);
+                        loginOk();
                         consult_Article(indiceArticle);
                     }
                     else {
@@ -303,7 +303,7 @@ public class Controller extends WindowAdapter implements ActionListener
         }
         else
         {
-            JOptionPane.showMessageDialog(null,"ACHAT REUSSI !, Merci pour votre achat !");
+            //JOptionPane.showMessageDialog(null,"ACHAT REUSSI !, Merci pour votre achat !");
             quantite = reponseSplit[2];
 
             // MAJ DU PRIX TOTAL
